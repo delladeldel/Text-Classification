@@ -57,5 +57,4 @@ user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder
 # ==================== PREDICTION ====================
 if st.button("🔍 Prediksi"):
     if user_input.strip() == "":
-    st.warning("Teks tidak boleh kosong!")
-
+    
