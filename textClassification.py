@@ -62,5 +62,20 @@ if st.button("🔍 Prediksi"):
         cleaned = clean_text(user_input)
         vectorized = vectorizer.transform([cleaned])
         prediction = model.predict(vectorized)[0]
-        st.success(f"✅ Prediksi Label: **{prediction}**")
-    
+                # Mapping label 0–8 menjadi 0, 100, 200, ..., 800
+        label_map = {
+            0: 0,
+            1: 100,
+            2: 200,
+            3: 300,
+            4: 400,
+            5: 500,
+            6: 600,
+            7: 700,
+            8: 800,
+            9: 900
+        }
+
+        mapped_label = label_map.get(prediction, "Tidak Dikenal")
+        st.success(f"✅ Prediksi Label: **{mapped_label}**")
+     
