@@ -1,6 +1,7 @@
 import streamlit as st
 import pickle
 import re
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 # ==================== SETUP ====================
 st.set_page_config(
@@ -40,15 +41,21 @@ def load_model():
 model, vectorizer = load_model()
 
 # ==================== CLEANING FUNCTION ====================
+# Inisialisasi stemmer
+factory = StemmerFactory()
+stemmer = factory.create_stemmer()
+
 def clean_text(text):
     text = text.lower()
     text = re.sub(r'[^a-z\s]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
-    return text
-
+    return stemmer.stem(text)
+    
 # ==================== TEXT INPUT ====================
 user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder="Contoh: Strategi Komunikasi Persu...")
 
 # ==================== PREDICTION ====================
 if st.button("🔍 Prediksi"):
-    if user_input.strip() ==_
+    if user_input.strip() == "":
+    st.warning("Teks tidak boleh kosong!")
+
