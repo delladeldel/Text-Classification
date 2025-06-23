@@ -57,4 +57,10 @@ user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder
 # ==================== PREDICTION ====================
 if st.button("🔍 Prediksi"):
     if user_input.strip() == "":
+        st.warning("Teks tidak boleh kosong!")
+    else:
+        cleaned = clean_text(user_input)
+        vectorized = vectorizer.transform([cleaned])
+        prediction = model.predict(vectorized)[0]
+        st.success(f"✅ Prediksi Label: **{prediction}**")
     
