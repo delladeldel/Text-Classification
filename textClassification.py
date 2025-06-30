@@ -52,4 +52,5 @@ if st.button("🔍 Prediksi"):
             vectorized = vectorizer.transform([cleaned])
             reduced = svd.transform(vectorized)
             prediction = model.predict(reduced)[0]
-        st.success(f"📌 Hasil Prediksi: **{prediction}**")
+            prediction_scaled = prediction * 100
+        st.success(f"📌 Hasil Prediksi: **{prediction_scaled}**")
