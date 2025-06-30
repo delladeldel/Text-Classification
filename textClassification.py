@@ -1,6 +1,8 @@
 import streamlit as st
-import pickle
 import re
+import pickle
+import requests
+from io import BytesIO
 
 # ==================== SETUP ====================
 st.set_page_config(
@@ -9,56 +11,53 @@ st.set_page_config(
     layout="centered"
 )
 
-# ==================== STYLE ====================
-st.markdown("""
-    <style>
-    .main {
-        background-color: #f8f9fa;
-    }
-    .stButton>button {
-        color: white;
-        background-color: #4CAF50;
-        padding: 0.5em 1em;
-        border-radius: 8px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# ==================== TITLE ====================
 st.title("🧠 Klasifikasi Teks")
-st.write("Masukkan Judul Skripsi / Tesis, lalu sistem akan memprediksi label/kategorinya.")
-
-# ==================== LOAD MODEL & VECTORIZER ====================
-@st.cache_resource
-def load_resources():
-    with open('model.pkl', 'rb') as f_model:
-        model = pickle.load(f_model)
-    with open('vectorizer.pkl', 'rb') as f_vec:
-        vectorizer = pickle.load(f_vec)
-    return model, vectorizer
-
-model, vectorizer = load_resources()
+st.write("Prediksi kategori dari judul skripsi/tesis menggunakan model Logistic Regression.")
 
 # ==================== CLEANING FUNCTION ====================
 def clean_text(text):
     text = text.lower()
-    text = re.sub(r'[^a-z\s]', ' ', text)  # hanya huruf dan spasi
-    text = re.sub(r'\s+', ' ', text).strip()  # hapus spasi berlebih
+    text = re.sub(r'[^a-z\s]', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-# ==================== TEXT INPUT ====================
+# ==================== LOAD PICKLE FROM GITHUB (model & vectorizer) ====================
+@st.cache_resource
+def load_pickle_from_github(raw_url):
+    response = requests.get(raw_url)
+    return pickle.load(BytesIO(response.content))
+
+# ==================== LOAD PICKLE FROM GOOGLE DRIVE (SVD) ====================
+@st.cache_resource
+def load_pickle_from_gdrive(1ivgD2MQX9wbSYq133rihIvfUQpvSmO5F):
+    gdrive_url = f"https://drive.google.com/file/d/1ivgD2MQX9wbSYq133rihIvfUQpvSmO5F/view?usp=sharing"
+    response = requests.get(gdrive_url)
+    return pickle.load(BytesIO(response.content))
+
+# ====== GANTI DENGAN LINK RAW GITHUB DAN ID GOOGLE DRIVE ======
+
+# 👉 Ganti dengan link RAW GitHub (bukan halaman browser GitHub)
+MODEL_URL = "https://raw.githubusercontent.com/username/repo/main/model.pkl"
+VECTORIZER_URL = "https://raw.githubusercontent.com/username/repo/main/vectorizer.pkl"
+
+# 👉 Ganti dengan Google Drive file ID untuk svd.pkl
+SVD_ID = "PASTE_YOUR_SVD_FILE_ID_HERE"
+
+# ==================== LOAD ALL FILES ====================
+model = load_pickle_from_github(MODEL_URL)
+vectorizer = load_pickle_from_github(VECTORIZER_URL)
+svd = load_pickle_from_gdrive(SVD_ID)
+
+# ==================== INPUT USER ====================
 user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder="Contoh: Analisis Strategi Pemasaran Digital...")
 
-# ==================== PREDICTION ====================
+# ==================== PREDIKSI ====================
 if st.button("🔍 Prediksi"):
     if user_input.strip() == "":
         st.warning("Silakan masukkan teks terlebih dahulu.")
     else:
         cleaned = clean_text(user_input)
-        try:
-            vectorized = vectorizer.transform([cleaned])
-            prediction = model.predict(vectorized)[0]
-            st.success(f"📌 Hasil Prediksi: **{prediction}**")
-        except ValueError as e:
-            st.error(f"Terjadi kesalahan dimensi fitur.\n\nDetail: {e}")
-            st.info("Pastikan model dan vectorizer dilatih dari data yang sama.")
+        vectorized = vectorizer.transform([cleaned])
+        reduced = svd.transform(vectorized)
+        prediction = model.predict(reduced)[0]
+        st.success(f"📌 Hasil Prediksi: **{prediction}**")
