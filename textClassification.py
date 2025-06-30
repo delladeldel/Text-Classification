@@ -1,7 +1,6 @@
 import streamlit as st
 import pickle
 import re
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 # ==================== SETUP ====================
 st.set_page_config(
@@ -25,6 +24,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# ==================== TITLE & HEADER ====================
+st.title("🧠 Klasifikasi Teks")
+st.write("Masukkan Judul Skripsi / Tesis, lalu sistem akan memprediksi label/kategorinya.")
+
 # ==================== LOAD MODEL ====================
 @st.cache_resource
 def load_model():
@@ -32,42 +35,27 @@ def load_model():
         model = pickle.load(f)
     with open('vectorizer.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
-    with open('label_encoder.pkl', 'rb') as f:
-        le = pickle.load(f)
-    return model, vectorizer, le
+    return model, vectorizer
 
-model, vectorizer, le = load_model()
+model, vectorizer = load_model()
 
-# ==================== CLEANING + STEMMING FUNCTION ====================
-factory = StemmerFactory()
-stemmer = factory.create_stemmer()
-stemming_cache = {}
-
-def clean_and_stem(text):
-    text = str(text).lower()
-    text = re.sub(r'[^a-z\s]', ' ', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    words = text.split()
-    stemmed_words = []
-    for word in words:
-        if word in stemming_cache:
-            stemmed_words.append(stemming_cache[word])
-        else:
-            stemmed = stemmer.stem(word)
-            stemming_cache[word] = stemmed
-            stemmed_words.append(stemmed)
-    return ' '.join(stemmed_words)
+# ==================== CLEANING FUNCTION ====================
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r'[^a-z\s]', ' ', text)  # hanya huruf dan spasi
+    text = re.sub(r'\s+', ' ', text).strip()  # hilangkan spasi berlebih
+    return text
 
 # ==================== TEXT INPUT ====================
-user_input = st.text_area("📝 Masukkan judul skripsi:", height=150, placeholder="Contoh: Strategi Komunikasi Persuasif Dalam ...")
+user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder="Contoh: Strategi Komunikasi Persuasif dalam Pemasaran Digital...")
 
 # ==================== PREDICTION ====================
 if st.button("🔍 Prediksi"):
     if user_input.strip() == "":
-        st.warning("⚠️ Silakan masukkan teks terlebih dahulu.")
+        st.warning("Silakan masukkan teks terlebih dahulu.")
     else:
-        cleaned_text = clean_and_stem(user_input)
-        vectorized_input = vectorizer.transform([cleaned_text])
-        prediction = model.predict(vectorized_input)[0]
-        label_output = le.inverse_transform([prediction])[0]
-        st.success(f"🎯 Prediksi Kelas: **{label_output}**")
+        cleaned = clean_text(user_input)
+        vectorized = vectorizer.transform([cleaned])
+        prediction = model.predict(vectorized)[0]
+
+        st.success(f"📌 Hasil Prediksi: **{prediction}**")
