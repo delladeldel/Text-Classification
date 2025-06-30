@@ -25,23 +25,21 @@ def clean_text(text):
 @st.cache_resource
 def load_pickle_from_url(url):
     response = requests.get(url)
+    response.raise_for_status()
     return pickle.load(BytesIO(response.content))
 
-# ==================== GANTI URL BERIKUT SESUAI FILE-MU ====================
+# ==================== GANTI URL DI SINI ====================
+MODEL_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/model.pkl"
+VECTORIZER_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/vectorizer.pkl"
+SVD_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/svd.pkll"  # Ganti dengan linkmu
 
-MODEL_URL = "https://raw.githubusercontent.com/delladeldel/Text-Classification/main/model.pkl"
-VECTORIZER_URL = "https://raw.githubusercontent.com/delladeldel/Text-Classification/main/vectorizer.pkl"
+# ==================== LOAD MODEL, VECTORIZER, SVD ====================
+with st.spinner("📦 Memuat model dan data..."):
+    model = load_pickle_from_url(MODEL_URL)
+    vectorizer = load_pickle_from_url(VECTORIZER_URL)
+    svd = load_pickle_from_url(SVD_URL)
 
-# Contoh: SVD dari Hugging Face atau Dropbox dengan direct download
-SVD_URL = "https://huggingface.co/datasets/namakamu/namamodel/resolve/main/svd.pkl"
-# atau dari Dropbox: "https://www.dropbox.com/s/abc123xyz/svd.pkl?dl=1"
-
-# ==================== LOAD ALL FILES ====================
-model = load_pickle_from_url(MODEL_URL)
-vectorizer = load_pickle_from_url(VECTORIZER_URL)
-svd = load_pickle_from_url(SVD_URL)
-
-# ==================== INPUT ====================
+# ==================== TEXT INPUT ====================
 user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder="Contoh: Analisis Strategi Pemasaran Digital...")
 
 # ==================== PREDIKSI ====================
@@ -49,8 +47,9 @@ if st.button("🔍 Prediksi"):
     if user_input.strip() == "":
         st.warning("Silakan masukkan teks terlebih dahulu.")
     else:
-        cleaned = clean_text(user_input)
-        vectorized = vectorizer.transform([cleaned])
-        reduced = svd.transform(vectorized)
-        prediction = model.predict(reduced)[0]
+        with st.spinner("🔍 Memprediksi..."):
+            cleaned = clean_text(user_input)
+            vectorized = vectorizer.transform([cleaned])
+            reduced = svd.transform(vectorized)
+            prediction = model.predict(reduced)[0]
         st.success(f"📌 Hasil Prediksi: **{prediction}**")
