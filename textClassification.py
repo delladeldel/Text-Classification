@@ -2,6 +2,7 @@ import streamlit as st
 import pickle
 import re
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from sklearn.preprocessing import LabelEncoder
 
 # ==================== SETUP ====================
 st.set_page_config(
@@ -29,28 +30,43 @@ st.markdown("""
 st.title("🧠 Klasifikasi Teks")
 st.write("Masukkan Judul Skripsi / Tesis, lalu sistem akan memprediksi label/kategorinya.")
 
-# ==================== LOAD MODEL ====================
+# ==================== LOAD MODEL DAN OBJEK LAIN ====================
 @st.cache_resource
-def load_model():
+def load_all():
     with open('model.pkl', 'rb') as f:
         model = pickle.load(f)
     with open('vectorizer.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
-    return model, vectorizer
+    with open('svd.pkl', 'rb') as f:
+        svd = pickle.load(f)
 
-model, vectorizer = load_model()
+    # Inisialisasi LabelEncoder dengan urutan label yang sama seperti saat training
+    label_list = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+    le = LabelEncoder()
+    le.fit(label_list)
+
+    return model, vectorizer, svd, le
+
+model, vectorizer, svd, le = load_all()
 
 # ==================== CLEANING FUNCTION ====================
-# Inisialisasi stemmer
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
 def clean_text(text):
-    text = text.lower()
-    text = re.sub(r'[^a-z\s]', ' ', text)
+    text = str(text).lower()
+    text = re.sub(r'[^a-z0-9\s]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return stemmer.stem(text)
-    
+
+def prediksi_judul(judul_baru):
+    judul_bersih = clean_text(judul_baru)
+    judul_vector = vectorizer.transform([judul_bersih])
+    judul_vector_svd = svd.transform(judul_vector)
+    pred_encoded = model.predict(judul_vector_svd)[0]
+    pred_label = le.inverse_transform([pred_encoded])[0]
+    return pred_label
+
 # ==================== TEXT INPUT ====================
 user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder="Contoh: Strategi Komunikasi Persu...")
 
@@ -59,23 +75,5 @@ if st.button("🔍 Prediksi"):
     if user_input.strip() == "":
         st.warning("Teks tidak boleh kosong!")
     else:
-        cleaned = clean_text(user_input)
-        vectorized = vectorizer.transform([cleaned])
-        prediction = model.predict(vectorized)[0]
-                # Mapping label 0–8 menjadi 0, 100, 200, ..., 800
-        label_map = {
-            0: 0,
-            1: 100,
-            2: 200,
-            3: 300,
-            4: 400,
-            5: 500,
-            6: 600,
-            7: 700,
-            8: 800,
-            9: 900
-        }
-
-        mapped_label = label_map.get(prediction, "Tidak Dikenal")
-        st.success(f"✅ Prediksi Label: **{mapped_label}**")
-     
+        hasil_prediksi = prediksi_judul(user_input)
+        st.success(f"✅ Prediksi Label: **{hasil_prediksi}**")
