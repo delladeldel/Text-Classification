@@ -28,12 +28,12 @@ def load_pickle_from_url(url):
     response.raise_for_status()
     return pickle.load(BytesIO(response.content))
 
-# ==================== GANTI URL DI SINI ====================
+# ==================== MASUKKAN LINKMU DI SINI ====================
 MODEL_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/model.pkl"
 VECTORIZER_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/vectorizer.pkl"
-SVD_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/svd.pkll"  # Ganti dengan linkmu
+SVD_URL = "https://huggingface.co/delsdell/text_classification/resolve/main/svd.pkl"
 
-# ==================== LOAD MODEL, VECTORIZER, SVD ====================
+# ==================== LOAD ALL FILES ====================
 with st.spinner("📦 Memuat model dan data..."):
     model = load_pickle_from_url(MODEL_URL)
     vectorizer = load_pickle_from_url(VECTORIZER_URL)
