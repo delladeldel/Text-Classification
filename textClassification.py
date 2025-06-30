@@ -21,28 +21,25 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-# ==================== LOAD PICKLE FROM GITHUB (model & vectorizer) ====================
+# ==================== LOAD PICKLE FROM URL ====================
 @st.cache_resource
-def load_pickle_from_github(raw_url):
-    response = requests.get(raw_url)
+def load_pickle_from_url(url):
+    response = requests.get(url)
     return pickle.load(BytesIO(response.content))
 
-# ==================== LOAD PICKLE FROM GOOGLE DRIVE (SVD) ====================
-@st.cache_resource
-def load_pickle_from_gdrive(file_id):
-    gdrive_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    response = requests.get(gdrive_url)
-    return pickle.load(BytesIO(response.content))
+# ==================== GANTI URL BERIKUT SESUAI FILE-MU ====================
 
-# ====== LINK RAW GITHUB DAN GOOGLE DRIVE ID ======
-MODEL_URL = "https://raw.githubusercontent.com/delladeldel/Text-Classification/e911b3a4ca92fac2b9aaf86ea0f5221618189e6b/model.pkl"
-VECTORIZER_URL = "https://raw.githubusercontent.com/delladeldel/Text-Classification/e911b3a4ca92fac2b9aaf86ea0f5221618189e6b/vectorizer.pkl"
-SVD_ID = "1ivgD2MQX9wbSYq133rihIvfUQpvSmO5F"
+MODEL_URL = "https://raw.githubusercontent.com/delladeldel/Text-Classification/main/model.pkl"
+VECTORIZER_URL = "https://raw.githubusercontent.com/delladeldel/Text-Classification/main/vectorizer.pkl"
+
+# Contoh: SVD dari Hugging Face atau Dropbox dengan direct download
+SVD_URL = "https://huggingface.co/datasets/namakamu/namamodel/resolve/main/svd.pkl"
+# atau dari Dropbox: "https://www.dropbox.com/s/abc123xyz/svd.pkl?dl=1"
 
 # ==================== LOAD ALL FILES ====================
-model = load_pickle_from_github(MODEL_URL)
-vectorizer = load_pickle_from_github(VECTORIZER_URL)
-svd = load_pickle_from_gdrive(SVD_ID)
+model = load_pickle_from_url(MODEL_URL)
+vectorizer = load_pickle_from_url(VECTORIZER_URL)
+svd = load_pickle_from_url(SVD_URL)
 
 # ==================== INPUT ====================
 user_input = st.text_area("📝 Masukkan teks di sini:", height=150, placeholder="Contoh: Analisis Strategi Pemasaran Digital...")
