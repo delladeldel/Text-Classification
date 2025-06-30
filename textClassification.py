@@ -31,9 +31,9 @@ st.write("Masukkan Judul Skripsi / Tesis, lalu sistem akan memprediksi label/kat
 # ==================== LOAD MODEL & VECTORIZER ====================
 @st.cache_resource
 def load_resources():
-    with open('/mnt/data/model.pkl', 'rb') as f_model:
+    with open('model.pkl', 'rb') as f_model:
         model = pickle.load(f_model)
-    with open('/mnt/data/vectorizer.pkl', 'rb') as f_vec:
+    with open('vectorizer.pkl', 'rb') as f_vec:
         vectorizer = pickle.load(f_vec)
     return model, vectorizer
 
