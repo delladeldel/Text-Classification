@@ -37,11 +37,11 @@ def load_pickle_from_gdrive(1ivgD2MQX9wbSYq133rihIvfUQpvSmO5F):
 # ====== GANTI DENGAN LINK RAW GITHUB DAN ID GOOGLE DRIVE ======
 
 # 👉 Ganti dengan link RAW GitHub (bukan halaman browser GitHub)
-MODEL_URL = "https://raw.githubusercontent.com/username/repo/main/model.pkl"
-VECTORIZER_URL = "https://raw.githubusercontent.com/username/repo/main/vectorizer.pkl"
+MODEL_URL = "https://github.com/delladeldel/Text-Classification/blob/e911b3a4ca92fac2b9aaf86ea0f5221618189e6b/model.pkl"
+VECTORIZER_URL = "https://github.com/delladeldel/Text-Classification/blob/e911b3a4ca92fac2b9aaf86ea0f5221618189e6b/vectorizer.pkl"
 
 # 👉 Ganti dengan Google Drive file ID untuk svd.pkl
-SVD_ID = "PASTE_YOUR_SVD_FILE_ID_HERE"
+SVD_ID = "1ivgD2MQX9wbSYq133rihIvfUQpvSmO5F"
 
 # ==================== LOAD ALL FILES ====================
 model = load_pickle_from_github(MODEL_URL)
